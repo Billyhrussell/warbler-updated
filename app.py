@@ -43,6 +43,7 @@ def add_user_to_g():
 
 @app.before_request # do g attributes in here
 def add_CSRFProtectForm_to_g():
+    """ Add a CSRFProtectForm to g """
     g.CSRFForm = CSRFProtectForm() # This will call this form on every single request!!!
     # this can be called in jinja without referring to it because it's global
 
@@ -252,25 +253,26 @@ def profile():
     user = g.user
     form = EditProfileForm(obj=user)
 
-    if form.validate_on_submit():
-        user.username = request.form["username"]
-        user.email = request.form["email"]
-        user.image_url = request.form["image_url"]
-        user.header_image_url = request.form["header_image_url"]
-        user.bio = request.form["bio"]
-        password = request.form["password"]
+    if form.validate_on_submit(): #should just do form.username.data for ex
 
-        password_correct= User.authenticate(user.username, password)
+        # do URL from form or Default one for both images
 
-        if password_correct:
+        if User.authenticate(user.username, form.password.data):
+            user.username = form.username.data
+            user.email = form.email.data
+            user.image_url = form.image_url.data
+            user.header_image_url = form.header_image_url.data
+            user.bio = form.bio.data
+
             db.session.commit()
             flash("User Profile Updated")
             return redirect(f"/users/{g.user.id}")
 
         flash("User Password Incorrect")
-        return render_template("/users/edit.html", form=form)
-    else:
-        return render_template("/users/edit.html", form=form)
+    
+    return render_template("/users/edit.html", form=form)
+    # else:
+    #     return render_template("/users/edit.html", form=form)
 
 
 @app.post('/users/delete')
@@ -365,10 +367,14 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
-
+# query from user and user.following and then get messages from all
     if g.user:
+        following_ids = [followed.id for followed in g.user.following]
+        following_ids.append(g.user.id)
+
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
