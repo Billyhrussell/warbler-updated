@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -31,7 +31,7 @@ connect_db(app)
 # User signup/login/logout
 
 
-@app.before_request
+@app.before_request # do g attributes in here
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
@@ -40,6 +40,11 @@ def add_user_to_g():
 
     else:
         g.user = None
+
+@app.before_request # do g attributes in here
+def add_CSRFProtectForm_to_g():
+    g.CSRFForm = CSRFProtectForm() # This will call this form on every single request!!!
+    # this can be called in jinja without referring to it because it's global
 
 
 def do_login(user):
@@ -118,10 +123,20 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-    form = g.csrf_form
+    if CURR_USER_KEY not in session:
+        flash("You are not logged in")
+        return redirect('/')
+
+    form = g.CSRFForm
 
     # IMPLEMENT THIS AND FIX BUG
     # DO NOT CHANGE METHOD ON ROUTE
+
+    if form.validate_on_submit():
+        do_logout()
+        flash("Logged out successfully")
+
+    return redirect('/')
 
 
 ##############################################################################
@@ -192,6 +207,8 @@ def start_following(follow_id):
     Redirect to following page for the current for the current user.
     """
 
+    # form = g.CSRFForm
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -209,6 +226,7 @@ def stop_following(follow_id):
 
     Redirect to following page for the current for the current user.
     """
+    # form = g.CSRFForm
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -234,6 +252,8 @@ def delete_user():
 
     Redirect to signup page.
     """
+
+    # form = g.CSRFForm
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -297,6 +317,8 @@ def delete_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    # form = g.CSRFForm
+
     msg = Message.query.get_or_404(message_id)
     db.session.delete(msg)
     db.session.commit()
@@ -315,6 +337,7 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
     """
+
 
     if g.user:
         messages = (Message
