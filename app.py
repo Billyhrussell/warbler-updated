@@ -349,6 +349,10 @@ def delete_message(message_id):
     # form = g.CSRFForm
 
     msg = Message.query.get_or_404(message_id)
+    if g.user.id != msg.user_id:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     db.session.delete(msg)
     db.session.commit()
 
