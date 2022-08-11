@@ -282,7 +282,7 @@ def delete_user():
     Redirect to signup page.
     """
 
-    # form = g.CSRFForm
+    form = g.CSRFForm
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -365,6 +365,12 @@ def like_message(msg_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    msg = Message.query.get_or_404(msg_id)
+
+    if msg.user_id == g.user.id:
+        flash("Cannot like your own message")
+        return redirect(f"/messages/{msg_id}")
+
     like = Like(message_id = msg_id, user_id = g.user.id)
 
     # likes = g.user.likes
@@ -379,7 +385,7 @@ def like_message(msg_id):
     db.session.commit()
 
     #how to return to same page that like is placed?
-    return redirect("/")
+    return redirect(f"/messages/{msg_id}")
 
 @app.post("/<int:msg_id>/unlike")
 def unlike_message(msg_id):
@@ -395,6 +401,21 @@ def unlike_message(msg_id):
     db.session.commit()
 
     return redirect("/")
+
+@app.get("/users/<int:user_id>/likes")
+def show_likes(user_id):
+    """Show all likes for a user"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    msgs = user.likes
+
+    return render_template("users/likes.html", messages = msgs)
+
+
 
 ##############################################################################
 # Homepage and error pages

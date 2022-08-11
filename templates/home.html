@@ -58,8 +58,8 @@
 
               <p>{{ msg.text }}</p>
             </div>
-          </li>
-          {% if msg in g.user.likes %}
+            <div class="star">
+            {% if msg in g.user.likes %}
             <form action="/{{msg.id}}/unlike" method="POST">
               {{g.CSRFForm.hidden_tag()}}
               <button><i class="bi bi-star-fill"></i></button>
@@ -69,7 +69,11 @@
                 {{g.CSRFForm.hidden_tag()}}
                 <button><i class="bi bi-star"></i></button>
               </form>
+
             {% endif %}
+          </div>
+          </li>
+
         {% endfor %}
       </ul>
     </div>
