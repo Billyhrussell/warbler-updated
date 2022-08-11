@@ -35,8 +35,10 @@ app.config['WTF_CSRF_ENABLED'] = False
 
 
 class MessageBaseViewTestCase(TestCase):
+    """  """
     def setUp(self):
         User.query.delete()
+        Message.query.delete()
 
         u1 = User.signup("u1", "u1@email.com", "password", None)
         db.session.flush()
@@ -49,6 +51,9 @@ class MessageBaseViewTestCase(TestCase):
         self.m1_id = m1.id
 
         self.client = app.test_client()
+
+    def test_home_messages(self):
+
 
 
 class MessageAddViewTestCase(MessageBaseViewTestCase):

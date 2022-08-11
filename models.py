@@ -76,7 +76,7 @@ class User(db.Model):
     )
 
     messages = db.relationship('Message', backref="user")
-    likes = db.relationship('Message', secondary="likes", backref="like_user")
+    likes = db.relationship('Message', secondary="likes", backref="users_liked")
     #backref like_messages
 
     followers = db.relationship(
