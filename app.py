@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import EditProfileForm, UserAddForm, LoginForm, MessageForm, CSRFProtectForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Like
 
 load_dotenv()
 
@@ -269,7 +269,7 @@ def profile():
             return redirect(f"/users/{g.user.id}")
 
         flash("User Password Incorrect")
-    
+
     return render_template("/users/edit.html", form=form)
     # else:
     #     return render_template("/users/edit.html", form=form)
@@ -354,6 +354,47 @@ def delete_message(message_id):
 
     return redirect(f"/users/{g.user.id}")
 
+##############################################################################
+# Likes
+
+@app.post("/<int:msg_id>/like")
+def like_message(msg_id):
+    """Like a message."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    like = Like(message_id = msg_id, user_id = g.user.id)
+
+    # likes = g.user.likes
+    # liked_message = Message.query.get_or_404(msg_id)
+    # if liked_message in likes:
+    #     likes.remove(liked_message)
+    # else:
+    #     likes.append(liked_message)
+
+
+    db.session.add(like)
+    db.session.commit()
+
+    #how to return to same page that like is placed?
+    return redirect("/")
+
+@app.post("/<int:msg_id>/unlike")
+def unlike_message(msg_id):
+    """Unlike a message"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    like = Like.query.get_or_404((g.user.id, msg_id))
+
+    db.session.delete(like)
+    db.session.commit()
+
+    return redirect("/")
 
 ##############################################################################
 # Homepage and error pages
