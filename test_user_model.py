@@ -94,6 +94,7 @@ class UserModelTestCase(TestCase):
         user3 = User.signup("u3", "u3@email.com", "password")
 
         all_users = User.query.all()
+        breakpoint()
 
         self.assertIn(user3, all_users)
 

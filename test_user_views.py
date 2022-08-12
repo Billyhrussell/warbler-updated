@@ -112,22 +112,24 @@ class UserBaseViewTestCase(TestCase):
             self.assertIn(u3.username, html)
             self.assertEqual(resp.status_code, 200)
 
-            #todo: add values we know
+            #TODO: add values we know
 
-            # with self.client as c:
-            # with c.session_transaction() as sess:
-            #     sess[CURR_USER_KEY] = self.u1_id
+        # with self.client as c:
+        #     with c.session_transaction() as sess:
+        #         sess[CURR_USER_KEY] = self.u1_id
 
-            # u3 = User.signup("u3", "u3@email.com", "password", None)
+        #     u3 = User.signup("u3", "u3@email.com", "password")
+        #     db.session.commit()
+        #     u3_id = u3.id
 
-            # resp = c.post(f"/users/follow/{u3.id}",
-            #                 follow_redirects = True)
+        #     resp = c.post(f"/users/follow/{u3_id}",
+        #                     follow_redirects = True)
 
-            # u3 = User.query.filter_by(username = "u3")
+        #     u3 = User.query.get_or_404(u3_id)
 
-            # html = resp.get_data(as_text = True)
-            # self.assertIn(u3.username, html)
-            # self.assertEqual(resp.status_code, 200)
+        #     html = resp.get_data(as_text = True)
+        #     self.assertIn(u3.username, html)
+        #     self.assertEqual(resp.status_code, 200)
 
 
     def test_following_logged_out(self):
