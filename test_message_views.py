@@ -172,9 +172,4 @@ class MessageDeleteViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Access unauthorized.", html)
 
-    # Test add message not by user, not needed?
-
-
-
-
-
+    # Test add message not by user, probably not needed

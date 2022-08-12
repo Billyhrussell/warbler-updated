@@ -51,7 +51,9 @@ class MessageModelTestCase(TestCase):
         u1 = User.query.get(self.u1_id)
         
         self.assertEqual(len(u1.messages), 1)
-        self.assertEqual(len(m1.users_liked), 0)
+        self.assertEqual(len(m1.users_liked), 0) # could do this separately
+        self.assertEqual(u1.messages[0], 'message1')
+        
 
     def test_delete_message(self):
         """ Test deleting a message """
@@ -66,15 +68,19 @@ class MessageModelTestCase(TestCase):
         m3 = Message(text='message3', user_id = self.u2_id)
         db.session.add(m3)
         
-        self.assertIn(m3, Message.query.all())
+        self.assertIn(m3, Message.query.all()) # instead of checking entire object, can check its values
+
+        #a bunch of self.assertEqual(m3.text = 'message1')
 
         
-        try:
-            bad_message = Message(user_id = self.u2_id)
+        # try:
+        #     bad_message = Message(user_id = self.u2_id)
 
-        except:
-            all_messages = Message.query.all()
-            self.assertNotIn(bad_message, all_messages)
+        # except:
+        #     all_messages = Message.query.all()
+        #     self.assertNotIn(bad_message, all_messages)
+
+        #TODO: put this in different test and do the same with self.assertRaises(IntegrityError)
 
     def test_number_liked(self):
         """ Test that the number_liked relationship works as intended """

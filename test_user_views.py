@@ -65,7 +65,11 @@ class UserBaseViewTestCase(TestCase):
 
             html = resp.get_data(as_text = True)
             self.assertIn(following.username, html)
+            # instead of doing line 64 and and putting following.username in line 67, could just hardcode username
+            # don't query when you don't have to!
             self.assertEqual(resp.status_code, 200)
+
+            # could've made different following/follower relationships so that we could do an assertNotIn
 
     def test_followers_page(self):
         """Test that a user can see their followers"""
@@ -95,6 +99,7 @@ class UserBaseViewTestCase(TestCase):
             html = resp.get_data(as_text = True)
             self.assertNotIn(following.username, html)
             self.assertEqual(resp.status_code, 200)
+            #could also check inside database (check length of user.following list)
 
     def test_follow_user(self):
         """Test that a user can follow another user"""
@@ -112,7 +117,7 @@ class UserBaseViewTestCase(TestCase):
             self.assertIn(u3.username, html)
             self.assertEqual(resp.status_code, 200)
 
-            #TODO: add values we know
+            #can hard code values (like just putting "u3" instead of u3.username)
 
         # with self.client as c:
         #     with c.session_transaction() as sess:
@@ -130,6 +135,9 @@ class UserBaseViewTestCase(TestCase):
         #     html = resp.get_data(as_text = True)
         #     self.assertIn(u3.username, html)
         #     self.assertEqual(resp.status_code, 200)
+
+        # you have to do it this way because u3 gets lost in transaction
+        # previous instance will become unbound if you make a transaction (updating relationship in database)
 
 
     def test_following_logged_out(self):

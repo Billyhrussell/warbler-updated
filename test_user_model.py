@@ -7,6 +7,7 @@
 
 import os
 from unittest import TestCase
+from sqlalchemy.exc import IntegrityError
 
 from models import db, User
 
@@ -61,7 +62,7 @@ class UserModelTestCase(TestCase):
 
         self.assertEqual(f"{user}", f"<User #{user.id}: {user.username}, {user.email}>")
 
-    def test_is_following(self):
+    def test_is_following(self): # use actual is_following method
         """ Test for following relationship """
         user1 = User.query.get_or_404(self.u1_id)
         user2 = User.query.get_or_404(self.u2_id)
@@ -75,7 +76,7 @@ class UserModelTestCase(TestCase):
 
         self.assertEqual(user1.following, [])
 
-    def test_is_followed_by(self):
+    def test_is_followed_by(self): #use actual is_followed_by method
         """ Test for followed relationship """
         user1 = User.query.get_or_404(self.u1_id)
         user2 = User.query.get_or_404(self.u2_id)
@@ -88,22 +89,31 @@ class UserModelTestCase(TestCase):
 
         self.assertEqual(user1.followers, [])
 
-    def test_user_signup(self):
+    def test_user_signup(self): # test that password is hashed
         """ Test User signup """
 
         user3 = User.signup("u3", "u3@email.com", "password")
 
-        all_users = User.query.all()
-        breakpoint()
+        all_users = User.query.all() # expensive line! don't query entire user table, just the user
+
+        # could assert: username = 'u3', email = 'u3@email.com', password != 'password', password.startswith($2b$12)
+        # could just check that u3.password starts with $2b$12 instead of doing whole bcrypt.check_password_hash
+
+        # this works because it does not update in database, so variable is still bound
 
         self.assertIn(user3, all_users)
 
-        try:
-            bad_user = User.signup("u3", "bad_user@email.com", "password")
+        # could separate valid and invalid signups
 
-        except:
-            all_users = User.query.all()
-            self.assertNotIn(bad_user, all_users)  # not going into except?
+        bad_user = User.signup("u3", "bad_user@email.com", "password")
+
+        with self.assertRaises(IntegrityError): #after this, we just need to put something true to assert
+            self.assertEqual(1, 1)
+            # all_users = User.query.all()
+            # self.assertNotIn(bad_user, all_users)
+
+        # use self.assertRaises(error_name) instead of try except
+        # this is because it's in a test file
 
     def test_user_authenticate(self):
         """ Test authentication of a user """
@@ -111,6 +121,8 @@ class UserModelTestCase(TestCase):
 
         user = User.authenticate(user1.username, 'password') # can't user user1.password because it's already hashed
         self.assertEqual(user, user1)
+
+        # could separate valid and invalid authentications (one for username, one for password)
 
         bad_user = User.authenticate('wrong username', 'password')
         self.assertFalse(bad_user)
