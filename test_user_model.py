@@ -90,7 +90,7 @@ class UserModelTestCase(TestCase):
 
     def test_user_signup(self):
         """ Test User signup """
-        
+
         user3 = User.signup("u3", "u3@email.com", "password")
 
         all_users = User.query.all()
@@ -113,6 +113,6 @@ class UserModelTestCase(TestCase):
 
         bad_user = User.authenticate('wrong username', 'password')
         self.assertFalse(bad_user)
-        
+
         bad_user = User.authenticate(user1.username, 'wrong password')
         self.assertFalse(bad_user)
