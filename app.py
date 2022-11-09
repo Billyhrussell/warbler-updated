@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-
+from csv import DictReader
 import sqlalchemy as sa
 
 from flask import Flask, render_template, request, flash, redirect, session, g
@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import EditProfileForm, UserAddForm, LoginForm, MessageForm, CSRFProtectForm
-from models import db, connect_db, User, Message, Like
+from models import db, connect_db, User, Message, Like, Follows
 
 load_dotenv()
 
@@ -36,6 +36,18 @@ if not inspector.has_table("users"):
     with app.app_context():
         db.drop_all()
         db.create_all()
+
+        with open('generator/users.csv') as users:
+            db.session.bulk_insert_mappings(User, DictReader(users))
+
+        with open('generator/messages.csv') as messages:
+            db.session.bulk_insert_mappings(Message, DictReader(messages))
+
+        with open('generator/follows.csv') as follows:
+            db.session.bulk_insert_mappings(Follows, DictReader(follows))
+
+        db.session.commit()
+
         app.logger.info('Initialized the database!')
 else:
     app.logger.info('Database already contains the users table.')
