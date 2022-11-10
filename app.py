@@ -32,7 +32,7 @@ connect_db(app)
 # Check if the database needs to be initialized
 engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 inspector = sa.inspect(engine)
-if not inspector.has_table("users"):
+if not inspector.has_table("messages"):
     with app.app_context():
         db.drop_all()
         db.create_all()
